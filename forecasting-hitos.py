@@ -11,7 +11,7 @@ st.title("📊 Forecasting hitos 📊")
 # --- GUÍA VISUAL PARA EL USUARIO ---
 with st.expander("IMPORTANTE: Formato del archivo Excel", expanded=True):
     st.markdown("""
-    Tu archivo Excel **debe contener exactamente estas 6 columnas**. El sistema corregirá automáticamente:
+    Tu archivo Excel **debe contener estas 6 columnas**. 
     * **Espacios en nombres:** 'Proyecto A ' se agrupará con 'Proyecto A'.
     * **Formatos de %:** Tanto **0.1** como **10** serán interpretados como **10%**.
     """)
