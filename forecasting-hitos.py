@@ -11,16 +11,19 @@ st.title("📊 Forecasting hitos 📊")
 # --- GUÍA VISUAL PARA EL USUARIO ---
 with st.expander("IMPORTANTE: Formato del archivo Excel", expanded=True):
     st.markdown("""
-    Cada fila debe ser un hito. Repite el nombre del **Proyecto** y el **Total Proyecto** en cada fila.
-    El sistema limpiará automáticamente espacios y corregirá formatos de porcentaje (0.1 vs 10).
+    Tu archivo Excel **debe contener exactamente estas 6 columnas**. El sistema corregirá automáticamente:
+    * **Espacios en nombres:** 'Proyecto A ' se agrupará con 'Proyecto A'.
+    * **Formatos de %:** Tanto **0.1** como **10** serán interpretados como **10%**.
     """)
     
+    # Esta tabla muestra exactamente las columnas requeridas por el código
     data_ejemplo = {
-        "Proyecto (en Excel)": ["Proyecto A", "Proyecto A ", "Proyecto B", "Proyecto C"],
-        "Total Proyecto": [50000, 50000, 100000, 8290],
-        "Hito": ["Hito 1", "Hito 2", "Fase Única", "Hito Único"],
-        "% del Proyecto": [0.3, 0.7, 100, 1.0],
-        "Interpretación": ["30%", "70%", "100%", "100%"],
+        "Proyecto": ["Proyecto A", "Proyecto A ", "Proyecto B"],
+        "Total Proyecto": [50000, 50000, 100000],
+        "Hito": ["Diseño", "Desarrollo", "Entrega Final"],
+        "% del Proyecto": [0.3, 70, 1.0],  # Mezcla de decimales y enteros
+        "Fecha Inicio": ["2024-01-01", "2024-02-01", "2024-03-01"],
+        "Fecha Fin": ["2024-01-31", "2024-04-30", "2024-05-31"]
     }
     st.table(pd.DataFrame(data_ejemplo))
 
