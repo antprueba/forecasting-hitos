@@ -9,7 +9,7 @@ st.set_page_config(page_title="Forecasting Hitos", layout="wide")
 st.title("📊 Forecasting hitos 📊")
 
 # --- GUÍA VISUAL PARA EL USUARIO ---
-with st.expander("📢 IMPORTANTE: Formato del archivo Excel", expanded=True):
+with st.expander("IMPORTANTE: Formato del archivo Excel", expanded=True):
     st.markdown("""
     Cada fila debe ser un hito. Repite el nombre del **Proyecto** y el **Total Proyecto** en cada fila.
     El sistema limpiará automáticamente espacios y corregirá formatos de porcentaje (0.1 vs 10).
@@ -37,10 +37,10 @@ if archivo_subido is not None:
         if not all(c in df.columns for c in cols_req):
             st.error(f"Faltan columnas. Asegúrate de tener: {', '.join(cols_req)}")
         else:
-            # 1. Limpieza de nombres de proyecto (Bypass de duplicados por espacios)
+            # 1. Limpieza de nombres de proyecto (Bypass de duplicados por espacios/mayúsculas)
             df['Proyecto'] = df['Proyecto'].astype(str).str.strip().str.title()
 
-            # 2. Normalización de porcentajes (Bypass de formatos mixtos)
+            # 2. Normalización de porcentajes (Detecta si es base 1 o base 100)
             def normalizar_porcentaje(valor):
                 try:
                     val = float(valor)
@@ -85,10 +85,11 @@ if archivo_subido is not None:
 
             df_final = pd.DataFrame(resumen)
             
-            # Totales
+            # Totales Finales
             f_tot = {c: '' for c in df_final.columns}
             f_tot['Proyecto'] = 'TOTAL MENSUAL'
-            for c in ['Monto Hito'] + meses: f_tot[c] = df_final[c].sum()
+            for c in ['Monto Hito'] + meses: 
+                f_tot[c] = df_final[c].sum()
             df_final = pd.concat([df_final, pd.DataFrame([f_tot])], ignore_index=True)
 
             # --- VISUALIZACIÓN ---
@@ -104,49 +105,48 @@ if archivo_subido is not None:
                 ws = writer.sheets['Proyeccion']
                 ws.set_column(2, len(df_final.columns), 18, fmt)
             
-            # Codificación Base64 para el link
             b64 = base64.b64encode(buffer.getvalue()).decode()
             filename = "reporte_proyeccion.xlsx"
             
-           st.markdown(f"""
-    <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" 
-       download="{filename}" 
-       style="text-decoration: none;">
-        <div style="
-            background-color: #2e7d32;
-            color: white;
-            padding: 16px 24px;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 18px;
-            cursor: pointer;
-            border: 2px solid #1b5e20;
-            box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
-            transition: 0.3s;">
-            📥 DESCARGAR EXCEL
-        </div>
-    </a>
+            st.markdown(f"""
+                <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" 
+                   download="{filename}" 
+                   style="text-decoration: none;">
+                    <div style="
+                        background-color: #2e7d32;
+                        color: white;
+                        padding: 16px 24px;
+                        border-radius: 10px;
+                        text-align: center;
+                        font-weight: bold;
+                        font-size: 18px;
+                        cursor: pointer;
+                        border: 2px solid #1b5e20;
+                        box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+                        transition: 0.3s;">
+                        📥 DESCARGAR EXCEL
+                    </div>
+                </a>
 
-    <div style="
-        background-color: #fff4e5; 
-        border-left: 6px solid #ffa117;
-        padding: 15px;
-        margin-top: 20px;
-        border-radius: 6px;
-        font-family: sans-serif;">
-        <h4 style="margin: 0 0 8px 0; color: #663c00; font-size: 1rem;">
-            ⚠️ ¿Problemas con la descarga?
-        </h4>
-        <p style="margin: 0; color: #663c00; font-size: 0.9rem; line-height: 1.4;">
-            Debido a la seguridad de <b>Notion</b>, si al hacer clic no ocurre nada, sigue uno de estos pasos:
-            <br><br>
-            1. Haz <b>clic derecho</b> sobre el botón verde y selecciona <i>"Abrir en pestaña nueva"</i>.
-            <br>
-            2. O pulsa el icono de la <b>flecha ↗️</b> en la esquina superior derecha de esta ventana para abrir la app en grande y descargar desde allí.
-        </p>
-    </div>
-""", unsafe_allow_html=True)
+                <div style="
+                    background-color: #fff4e5; 
+                    border-left: 6px solid #ffa117;
+                    padding: 15px;
+                    margin-top: 20px;
+                    border-radius: 6px;
+                    font-family: sans-serif;">
+                    <h4 style="margin: 0 0 8px 0; color: #663c00; font-size: 1rem;">
+                        ⚠️ ¿Problemas con la descarga?
+                    </h4>
+                    <p style="margin: 0; color: #663c00; font-size: 0.9rem; line-height: 1.4;">
+                        Debido a la seguridad de <b>Notion</b>, si al hacer clic no ocurre nada:
+                        <br><br>
+                        1. Haz <b>clic derecho</b> sobre el botón verde y selecciona <i>"Abrir en pestaña nueva"</i>.
+                        <br>
+                        2. O pulsa el icono de la <b>flecha ↗️</b> arriba a la derecha para abrir en ventana completa.
+                    </p>
+                </div>
+            """, unsafe_allow_html=True)
 
     except Exception as e:
         st.error(f"Error procesando el archivo: {e}")
