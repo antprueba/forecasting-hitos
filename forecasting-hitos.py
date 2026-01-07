@@ -16,11 +16,11 @@ with st.expander("IMPORTANTE: Formato del archivo Excel", expanded=True):
     """)
     
     data_ejemplo = {
-        "Proyecto": ["Proyecto A", "Proyecto A ", "Proyecto B"],
-        "Total Proyecto": [50000, 50000, 100000],
-        "Hito": ["Firma", "Ejecución", "Fase Única"],
-        "% del Proyecto": [0.3, 25, 100],
-        "Interpretación": ["30%", "25%", "100%"]
+        "Proyecto (en Excel)": ["Proyecto A", "Proyecto A ", "Proyecto B", "Proyecto C"],
+        "Total Proyecto": [50000, 50000, 100000, 8290],
+        "Hito": ["Hito 1", "Hito 2", "Fase Única", "Hito Único"],
+        "% del Proyecto": [0.3, 0.7, 100, 1.0],
+        "Interpretación": ["30%", "70%", "100%", "100%"],
     }
     st.table(pd.DataFrame(data_ejemplo))
 
@@ -136,14 +136,14 @@ if archivo_subido is not None:
                     border-radius: 6px;
                     font-family: sans-serif;">
                     <h4 style="margin: 0 0 8px 0; color: #663c00; font-size: 1rem;">
-                        ⚠️ ¿Problemas con la descarga?
+                        ¿Problemas con la descarga?
                     </h4>
                     <p style="margin: 0; color: #663c00; font-size: 0.9rem; line-height: 1.4;">
                         Debido a la seguridad de <b>Notion</b>, si al hacer clic no ocurre nada:
                         <br><br>
                         1. Haz <b>clic derecho</b> sobre el botón verde y selecciona <i>"Abrir en pestaña nueva"</i>.
                         <br>
-                        2. O pulsa el icono de la <b>flecha ↗️</b> arriba a la derecha para abrir en ventana completa.
+                        2. O pulsa el icono de la <b>flecha ↗️</b> para abrir en ventana completa.
                     </p>
                 </div>
             """, unsafe_allow_html=True)
