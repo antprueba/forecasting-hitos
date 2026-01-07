@@ -120,11 +120,11 @@ if archivo_subido is not None:
                         text-align: center;
                         font-weight: bold;
                         cursor: pointer;">
-                        📥 DESCARGAR EXCEL (Bypass Notion)
+                        📥 DESCARGAR EXCEL 
                     </div>
                 </a>
                 <p style="font-size: 0.85rem; color: #666; margin-top: 10px; text-align: center;">
-                    💡 Si el botón no funciona, abre la app en ventana completa con el icono ↗️ en la esquina de Notion.
+                    💡 Si el botón no funciona, haz click derecho -> Abrir en pestaña nueva.
                 </p>
             """, unsafe_allow_html=True)
 
