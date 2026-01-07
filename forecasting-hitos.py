@@ -13,7 +13,7 @@ with st.expander("IMPORTANTE: Formato del archivo Excel", expanded=True):
     st.markdown("""
     Tu archivo Excel **debe contener estas 6 columnas**. 
     * **Espacios en nombres:** 'Proyecto A ' se agrupará con 'Proyecto A'.
-    * **Formatos de %:** Tanto **0.1** como **10** serán interpretados como **10%**.
+    * **Formatos de %:** Tanto **0.1** como **10** serán interpretados como **10%**. 1.0 será interpretado como **100%**.
     """)
     
     # Esta tabla muestra exactamente las columnas requeridas por el código
