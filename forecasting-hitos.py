@@ -34,7 +34,20 @@ archivo_subido = st.file_uploader("Sube tu archivo Excel aquí", type=["xlsx"])
 
 if archivo_subido is not None:
     try:
-        df = pd.read_excel(archivo_subido)
+        # ========================================================
+        # INICIO: MÓDULO DE DETECCIÓN AUTOMÁTICA DE EXTENSIÓN
+        # ========================================================
+        nombre_archivo = archivo_subido.name.lower()
+        
+        if nombre_archivo.endswith('.csv'):
+            # Detecta separadores (, o ;) automáticamente para CSV
+            df = pd.read_csv(archivo_subido, sep=None, engine='python', encoding='utf-8')
+        else:
+            # Lectura estándar para archivos Excel
+            df = pd.read_excel(archivo_subido)
+        # ========================================================
+        # FIN: MÓDULO DE DETECCIÓN AUTOMÁTICA DE EXTENSIÓN
+        # ========================================================
         
         cols_req = ["Proyecto", "Total Proyecto", "Hito", "% del Proyecto", "Fecha Inicio", "Fecha Fin"]
         if not all(c in df.columns for c in cols_req):
