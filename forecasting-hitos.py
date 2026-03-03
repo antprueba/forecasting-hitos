@@ -30,8 +30,7 @@ with st.expander("IMPORTANTE: Formato del archivo Excel", expanded=True):
 st.divider()
 
 # --- CARGA DE ARCHIVO ---
-archivo_subido = st.file_uploader("Sube tu archivo Excel aquí", type=["xlsx"])
-
+archivo_subido = st.file_uploader("Sube tu archivo (.xlsx o .csv) aquí", type=["xlsx", "csv", "txt"])
 if archivo_subido is not None:
     try:
         # ========================================================
