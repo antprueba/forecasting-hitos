@@ -82,6 +82,8 @@ if archivo_subido is not None:
                 except: return 0.0
 
             df['Pct_Normalizado'] = df['% del Proyecto'].apply(normalizar_porcentaje)
+            #  transformar"Prueba 1 (https://...)" en "Prueba 1"
+            df['Proyecto'] = df['Proyecto'].astype(str).apply(lambda x: x.split('(')[0].strip())
             
             # 5. PROCESAMIENTO DE FECHAS
             def parsear_fechas(serie):
