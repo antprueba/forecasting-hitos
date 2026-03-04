@@ -29,43 +29,82 @@ with st.expander("IMPORTANTE: Formato del archivo Excel", expanded=True):
 
 st.divider()
 
-# --- CARGA DE ARCHIVO ---
+# --- CARGA DE DATOS ---
 archivo_subido = st.file_uploader("Sube tu archivo (.xlsx o .csv) aquí", type=["xlsx", "csv", "txt"])
+
 if archivo_subido is not None:
     try:
-        # ========================================================
-        # INICIO: MÓDULO DE DETECCIÓN AUTOMÁTICA DE EXTENSIÓN
-        # ========================================================
+        # 1. DETECCIÓN Y LECTURA CON LIMPIEZA DE "CARACTERES FANTASMA" (BOM)
         nombre_archivo = archivo_subido.name.lower()
-        
-        if nombre_archivo.endswith('.csv'):
-            # Detecta separadores (, o ;) automáticamente para CSV
-            df = pd.read_csv(archivo_subido, sep=None, engine='python', encoding='utf-8')
+        if nombre_archivo.endswith('.csv') or nombre_archivo.endswith('.txt'):
+            # Usamos encoding='utf-8-sig' para eliminar automáticamente el \ufeff (BOM)
+            df = pd.read_csv(archivo_subido, sep=None, engine='python', encoding='utf-8-sig')
         else:
-            # Lectura estándar para archivos Excel
             df = pd.read_excel(archivo_subido)
-        # ========================================================
-        # FIN: MÓDULO DE DETECCIÓN AUTOMÁTICA DE EXTENSIÓN
-        # ========================================================
-        
-        cols_req = ["Proyecto", "Total Proyecto", "Hito", "% del Proyecto", "Fecha Inicio", "Fecha Fin"]
-        if not all(c in df.columns for c in cols_req):
-            st.error(f"Faltan columnas. Asegúrate de tener: {', '.join(cols_req)}")
-        else:
-            # 1. Limpieza de nombres de proyecto (Bypass de duplicados por espacios/mayúsculas)
-            df['Proyecto'] = df['Proyecto'].astype(str).str.strip().str.title()
 
-            # 2. Normalización de porcentajes (Detecta si es base 1 o base 100)
+        # 2. LIMPIEZA RADICAL DE COLUMNAS
+        # Quitamos espacios, pasamos a minúsculas y eliminamos cualquier residuo invisible
+        df.columns = [str(c).strip().lower().replace('\ufeff', '') for c in df.columns]
+        
+        # Mapa de búsqueda flexible
+        cols_buscadas = {
+            "proyecto": "Proyecto",
+            "total proyecto": "Total Proyecto",
+            "hito": "Hito",
+            "% del proyecto": "% del Proyecto",
+            "fecha inicio": "Fecha Inicio",
+            "fecha fin": "Fecha Fin"
+        }
+        
+        # Verificamos qué falta realmente
+        faltantes = [v for k, v in cols_buscadas.items() if k not in df.columns]
+        
+        if faltantes:
+            st.error(f"Faltan columnas: {', '.join(faltantes)}")
+            # Esto te ayudará a ver qué está leyendo Python exactamente:
+            st.write("Columnas detectadas (limpias):", list(df.columns))
+        else:
+            # Renombramos para que el resto del código funcione
+            df = df.rename(columns={k: v for k, v in cols_buscadas.items()})
+
+            # 3. LIMPIEZA DE FILAS Y DATOS
+            df = df.dropna(how='all').reset_index(drop=True)
+
+            # 4. NORMALIZACIÓN DE PORCENTAJES (Soporta 5%, 0.05 y "0,05")
             def normalizar_porcentaje(valor):
+                if pd.isna(valor): return 0.0
                 try:
-                    val = float(valor)
+                    # Limpieza de símbolos y espacios raros de Notion
+                    val_str = str(valor).replace('%', '').replace(',', '.').replace('\xa0', '').strip()
+                    val = float(val_str)
+                    # Si es mayor a 1, es formato 1-100 (ej. 5), si no, es decimal (ej. 0.05)
                     return val / 100 if val > 1 else val
-                except:
-                    return 0.0
+                except: return 0.0
 
             df['Pct_Normalizado'] = df['% del Proyecto'].apply(normalizar_porcentaje)
-            df['Fecha Inicio'] = pd.to_datetime(df['Fecha Inicio'])
-            df['Fecha Fin'] = pd.to_datetime(df['Fecha Fin'])
+            
+            # 5. PROCESAMIENTO DE FECHAS
+            def parsear_fechas(serie):
+                # Formato día-mes-año (04/03/2026)
+                fechas = pd.to_datetime(serie, errors='coerce', dayfirst=True)
+                # Formato texto (marzo de 2026)
+                if fechas.isna().any():
+                    meses = {'enero': '1', 'febrero': '2', 'marzo': '3', 'abril': '4', 'mayo': '5', 'junio': '6',
+                             'julio': '7', 'agosto': '8', 'septiembre': '9', 'octubre': '10', 'noviembre': '11', 'diciembre': '12'}
+                    for es, num in meses.items():
+                        serie = serie.astype(str).lower().str.replace(f" de {es} de ", f"/{num}/")
+                    fechas_alternativas = pd.to_datetime(serie, errors='coerce', dayfirst=True)
+                    fechas.update(fechas_alternativas)
+                return fechas
+
+            df['Fecha Inicio'] = parsear_fechas(df['Fecha Inicio'])
+            df['Fecha Fin'] = parsear_fechas(df['Fecha Fin'])
+            
+            # Filtramos filas sin fecha válida
+            df = df.dropna(subset=['Fecha Inicio', 'Fecha Fin'])
+            
+            # --- CONTINÚA EL CÁLCULO DE DISTRIBUCIÓN ---
+            # (Aquí va el resto de tu código de auditoría y tabla final)
             
             # --- PANEL DE AUDITORÍA ---
             st.subheader("🔍 Verificación de Proyectos (Suma de Hitos)")
